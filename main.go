@@ -1,17 +1,14 @@
 package main
 
 import (
-	"net/http"
+	"example/backend/todo"
 
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
 	r := gin.Default()
-	r.GET("/", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "Hello World!",
-		})
-	})
+	todos := r.Group("/todos")
+	todo.Register(todos)
 	r.Run()
 }
