@@ -10,5 +10,5 @@ func main() {
 	r := gin.Default()
 	todos := r.Group("/todos")
 	todo.Register(todos)
-	r.Run()
+	r.Run(":3001")
 }
