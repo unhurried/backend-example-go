@@ -1,6 +1,7 @@
 package todo
 
 import (
+	"example/backend/rest"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -45,9 +46,9 @@ func get(c *gin.Context) {
 	if todo, exists := todos[id]; exists {
 		c.JSON(http.StatusOK, todo)
 	} else {
-		c.JSON(http.StatusNotFound, gin.H{
-			"code": "not_found",
-		})
+		c.Error(rest.NotFoundError)
+		c.Abort()
+		return
 	}
 }
 
@@ -59,9 +60,9 @@ func put(c *gin.Context) {
 		todos[id] = body
 		c.JSON(http.StatusOK, todos[id])
 	} else {
-		c.JSON(http.StatusNotFound, gin.H{
-			"code": "not_found",
-		})
+		c.Error(rest.NotFoundError)
+		c.Abort()
+		return
 	}
 }
 
@@ -71,8 +72,8 @@ func del(c *gin.Context) {
 		delete(todos, id)
 		c.Status(http.StatusNoContent)
 	} else {
-		c.JSON(http.StatusNotFound, gin.H{
-			"code": "not_found",
-		})
+		c.Error(rest.NotFoundError)
+		c.Abort()
+		return
 	}
 }
