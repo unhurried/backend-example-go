@@ -1,11 +1,15 @@
 package todo
 
 import (
+	"context"
+	"example/backend/db"
+	"example/backend/ent"
 	"example/backend/rest"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/rs/xid"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 var todos map[string]Todo = make(map[string]Todo)
@@ -18,62 +22,107 @@ func Register(g *gin.RouterGroup) {
 	g.DELETE("/:id", del)
 }
 
-func getList(c *gin.Context) {
-	c.Header("Content-Type", "application/json")
+func entityToBody(e *ent.Todo) *Todo {
+	return &Todo{
+		Id:       strconv.Itoa(e.ID),
+		Title:    e.Title,
+		Category: e.Category,
+		Content:  e.Content,
+	}
+}
 
-	items := make([]Todo, 0, len(todos))
-	for _, val := range todos {
-		items = append(items, val)
+func getList(c *gin.Context) {
+	entities, err := db.Client.Todo.Query().All(context.Background())
+	if err != nil {
+		c.Error(rest.InternalServerError)
+		c.Abort()
+		return
+	}
+
+	items := make([]Todo, 0, len(entities))
+	for _, entity := range entities {
+		items = append(items, *entityToBody(entity))
 	}
 
 	var resBody = gin.H{
-		"total": len(todos),
+		"total": len(items),
 		"items": items,
 	}
+
+	c.Header("Content-Type", "application/json")
 	c.JSON(http.StatusOK, resBody)
 }
 
 func post(c *gin.Context) {
 	var body Todo
 	c.BindJSON(&body)
-	body.Id = xid.New().String()
-	todos[body.Id] = body
+
+	entity, err := db.Client.Todo.Create().
+		SetTitle(body.Title).SetCategory(body.Category).SetContent(body.Content).Save(context.Background())
+	if err != nil {
+		c.Error(rest.InternalServerError)
+		c.Abort()
+		return
+	}
+	body.Id = strconv.Itoa(entity.ID)
+
+	c.Header("Content-Type", "application/json")
 	c.JSON(http.StatusCreated, body)
 }
 
 func get(c *gin.Context) {
-	id := c.Param("id")
-	if todo, exists := todos[id]; exists {
-		c.JSON(http.StatusOK, todo)
-	} else {
+	id, _ := strconv.Atoi(c.Param("id"))
+
+	entity, err := db.Client.Todo.Get(context.Background(), id)
+	if _, ok := err.(*ent.NotFoundError); ok {
 		c.Error(rest.NotFoundError)
 		c.Abort()
 		return
+	} else if err != nil {
+		c.Error(rest.InternalServerError)
+		c.Abort()
+		return
 	}
+
+	c.Header("Content-Type", "application/json")
+	c.JSON(http.StatusOK, entityToBody(entity))
 }
 
 func put(c *gin.Context) {
-	id := c.Param("id")
-	if _, exists := todos[id]; exists {
-		var body Todo
-		c.BindJSON(&body)
-		todos[id] = body
-		c.JSON(http.StatusOK, todos[id])
-	} else {
+	id, _ := strconv.Atoi(c.Param("id"))
+	var body Todo
+	c.BindJSON(&body)
+
+	entity, err := db.Client.Todo.UpdateOneID(id).
+		SetTitle(body.Title).SetCategory(body.Category).SetContent(body.Content).Save(context.Background())
+
+	if _, ok := err.(*ent.NotFoundError); ok {
 		c.Error(rest.NotFoundError)
 		c.Abort()
 		return
+	} else if err != nil {
+		c.Error(rest.InternalServerError)
+		c.Abort()
+		return
 	}
+
+	c.Header("Content-Type", "application/json")
+	c.JSON(http.StatusOK, entityToBody(entity))
 }
 
 func del(c *gin.Context) {
-	id := c.Param("id")
-	if _, exists := todos[id]; exists {
-		delete(todos, id)
-		c.Status(http.StatusNoContent)
-	} else {
+	id, _ := strconv.Atoi(c.Param("id"))
+
+	err := db.Client.Todo.DeleteOneID(id).Exec(context.Background())
+	if _, ok := err.(*ent.NotFoundError); ok {
 		c.Error(rest.NotFoundError)
 		c.Abort()
 		return
+	} else if err != nil {
+		c.Error(rest.InternalServerError)
+		c.Abort()
+		return
 	}
+
+	c.Status(http.StatusNoContent)
 }

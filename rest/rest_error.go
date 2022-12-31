@@ -10,3 +10,4 @@ func (re *RestError) Error() string {
 }
 
 var NotFoundError = &RestError{StatusCode: 404, ErrorCode: "not_found"}
+var InternalServerError = &RestError{StatusCode: 500, ErrorCode: "internal_server_error"}
