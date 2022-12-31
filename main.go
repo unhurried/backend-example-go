@@ -1,6 +1,7 @@
 package main
 
 import (
+	"example/backend/db"
 	"example/backend/rest"
 	"example/backend/todo"
 
@@ -9,6 +10,9 @@ import (
 )
 
 func main() {
+	db.Open()
+	defer db.Close()
+
 	r := gin.Default()
 	r.Use(rest.ErrorHandler)
 	authMiddleware, err := jwt.New(rest.AuthMiddleware)
