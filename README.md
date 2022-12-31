@@ -5,6 +5,8 @@ A simple Go project that serves REST APIs for TODO web app.
 ## Covered Features
 
 * API routing, (de)serialization and validation of request/response with [Gin](https://gin-gonic.com/).
+* API authentication by JWT access tokens with [gin-jwt/v2](https://pkg.go.dev/github.com/appleboy/gin-jwt/v2).
+* Load environment variables and .env file with [godotenv)](https://pkg.go.dev/github.com/joho/godotenv) and [env/v6](https://pkg.go.dev/github.com/caarlos0/env/v6)
 
 ## Development Guide
 
