@@ -9,6 +9,8 @@ require (
 	github.com/rs/xid v1.4.0
 )
 
+require entgo.io/ent v0.11.4 // indirect
+
 require (
 	github.com/caarlos0/env/v6 v6.10.1
 	github.com/gin-contrib/sse v0.1.0 // indirect
