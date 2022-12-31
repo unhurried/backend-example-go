@@ -5,16 +5,18 @@ go 1.19
 require (
 	github.com/appleboy/gin-jwt/v2 v2.9.1
 	github.com/gin-gonic/gin v1.8.2
+	github.com/golang-jwt/jwt/v4 v4.4.3
 	github.com/rs/xid v1.4.0
 )
 
 require (
+	github.com/caarlos0/env/v6 v6.10.1
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/go-playground/locales v0.14.0 // indirect
 	github.com/go-playground/universal-translator v0.18.0 // indirect
 	github.com/go-playground/validator/v10 v10.11.1 // indirect
 	github.com/goccy/go-json v0.10.0 // indirect
-	github.com/golang-jwt/jwt/v4 v4.4.3 // indirect
+	github.com/joho/godotenv v1.4.0
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect
 	github.com/mattn/go-isatty v0.0.16 // indirect
