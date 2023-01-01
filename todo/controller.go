@@ -12,8 +12,6 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-var todos map[string]Todo = make(map[string]Todo)
-
 func Register(g *gin.RouterGroup) {
 	g.GET("", getList)
 	g.POST("", post)
