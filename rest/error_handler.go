@@ -7,10 +7,7 @@ import (
 func ErrorHandler(c *gin.Context) {
 	c.Next()
 
-	for _, err := range c.Errors {
-		if re, ok := err.Err.(*RestError); ok {
-			c.AbortWithStatusJSON(re.StatusCode, gin.H{"error": re.ErrorCode})
-			return
-		}
+	if len(c.Errors) != 0 {
+		AbortWithRestError(c, InternalServerError)
 	}
 }
