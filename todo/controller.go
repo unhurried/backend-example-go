@@ -12,8 +12,6 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-var todos map[string]Todo = make(map[string]Todo)
-
 func Register(g *gin.RouterGroup) {
 	g.GET("", getList)
 	g.POST("", post)
@@ -34,8 +32,7 @@ func entityToBody(e *ent.Todo) *Todo {
 func getList(c *gin.Context) {
 	entities, err := db.Client.Todo.Query().All(context.Background())
 	if err != nil {
-		c.Error(rest.InternalServerError)
-		c.Abort()
+		rest.AbortWithError(c, err)
 		return
 	}
 
@@ -60,8 +57,7 @@ func post(c *gin.Context) {
 	entity, err := db.Client.Todo.Create().
 		SetTitle(body.Title).SetCategory(body.Category).SetContent(body.Content).Save(context.Background())
 	if err != nil {
-		c.Error(rest.InternalServerError)
-		c.Abort()
+		rest.AbortWithError(c, err)
 		return
 	}
 	body.Id = strconv.Itoa(entity.ID)
@@ -75,12 +71,10 @@ func get(c *gin.Context) {
 
 	entity, err := db.Client.Todo.Get(context.Background(), id)
 	if _, ok := err.(*ent.NotFoundError); ok {
-		c.Error(rest.NotFoundError)
-		c.Abort()
+		rest.AbortWithRestError(c, rest.NotFoundError)
 		return
 	} else if err != nil {
-		c.Error(rest.InternalServerError)
-		c.Abort()
+		rest.AbortWithError(c, err)
 		return
 	}
 
@@ -97,12 +91,10 @@ func put(c *gin.Context) {
 		SetTitle(body.Title).SetCategory(body.Category).SetContent(body.Content).Save(context.Background())
 
 	if _, ok := err.(*ent.NotFoundError); ok {
-		c.Error(rest.NotFoundError)
-		c.Abort()
+		rest.AbortWithRestError(c, rest.NotFoundError)
 		return
 	} else if err != nil {
-		c.Error(rest.InternalServerError)
-		c.Abort()
+		rest.AbortWithError(c, err)
 		return
 	}
 
@@ -115,12 +107,10 @@ func del(c *gin.Context) {
 
 	err := db.Client.Todo.DeleteOneID(id).Exec(context.Background())
 	if _, ok := err.(*ent.NotFoundError); ok {
-		c.Error(rest.NotFoundError)
-		c.Abort()
+		rest.AbortWithRestError(c, rest.NotFoundError)
 		return
 	} else if err != nil {
-		c.Error(rest.InternalServerError)
-		c.Abort()
+		rest.AbortWithError(c, err)
 		return
 	}
 
