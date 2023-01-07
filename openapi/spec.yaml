@@ -1,0 +1,245 @@
+openapi: 3.0.3
+info:
+  contact: {}
+  description: Todo API specification
+  title: Todo
+  version: "1.0"
+servers:
+- url: /
+paths:
+  /todos:
+    get:
+      operationId: TodoController_getList
+      parameters:
+      - description: Starting index of items to get
+        explode: true
+        in: query
+        name: Offset
+        required: false
+        schema:
+          default: 0
+          example: 5
+          minimum: 0
+          type: number
+        style: form
+      - description: Maximum number of items to get
+        explode: true
+        in: query
+        name: Limit
+        required: false
+        schema:
+          default: 10
+          example: 10
+          maximum: 100
+          minimum: 1
+          type: number
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TodoList'
+          description: Success
+      security:
+      - bearer: []
+      summary: Get a list of todo items
+      tags:
+      - Todo
+    post:
+      operationId: TodoController_post
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Todo'
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Todo'
+          description: Success
+      security:
+      - bearer: []
+      summary: Create a todo item
+      tags:
+      - Todo
+  /todos/{id}:
+    delete:
+      operationId: TodoController_delete
+      parameters:
+      - description: Resource ID
+        example: 1
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "204":
+          description: Success
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Resource not found
+      security:
+      - bearer: []
+      summary: Delete a todo item
+      tags:
+      - Todo
+    get:
+      operationId: TodoController_get
+      parameters:
+      - description: Resource ID
+        example: 1
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Todo'
+          description: Success
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Resource not found
+      security:
+      - bearer: []
+      summary: Get a todo item
+      tags:
+      - Todo
+    put:
+      operationId: TodoController_update
+      parameters:
+      - description: Resource ID
+        example: 1
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Todo'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Todo'
+          description: Success
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Resource not found
+      security:
+      - bearer: []
+      summary: Update a todo item
+      tags:
+      - Todo
+components:
+  schemas:
+    Todo:
+      example:
+        id: "1"
+        title: shopping
+        category: one
+        content: Buy milk.
+      properties:
+        id:
+          description: Id
+          example: "1"
+          readOnly: true
+          type: string
+        title:
+          description: Title
+          example: shopping
+          maxLength: 10
+          type: string
+        category:
+          description: Category
+          enum:
+          - one
+          - two
+          - three
+          type: string
+        content:
+          description: Content
+          example: Buy milk.
+          maxLength: 256
+          type: string
+      required:
+      - category
+      - title
+      type: object
+    TodoList:
+      example:
+        total: 1
+        items:
+        - id: "1"
+          title: shopping
+          category: one
+          content: Buy milk.
+        - id: "1"
+          title: shopping
+          category: one
+          content: Buy milk.
+      properties:
+        items:
+          description: List of todo items
+          items:
+            $ref: '#/components/schemas/Todo'
+          readOnly: true
+          type: array
+        total:
+          description: Total number of items
+          example: 1
+          readOnly: true
+          type: number
+      required:
+      - items
+      - total
+      type: object
+    Error:
+      properties:
+        code:
+          description: Error code
+          example: invalid_resource_id
+          readOnly: true
+          type: string
+        message:
+          description: Error message
+          example: Resource you requested does not exist.
+          readOnly: true
+          type: string
+      required:
+      - message
+      type: object
+  securitySchemes:
+    bearer:
+      bearerFormat: JWT
+      scheme: bearer
+      type: http
