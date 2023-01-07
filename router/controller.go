@@ -1,11 +1,11 @@
-package todo
+package router
 
 import (
 	"context"
 	"example/backend/db"
 	"example/backend/ent"
-	"example/backend/openapi"
-	"example/backend/rest"
+	"example/backend/middleware"
+	"example/backend/model"
 	"net/http"
 	"strconv"
 
@@ -13,8 +13,8 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-func entityToBody(e *ent.Todo) *openapi.Todo {
-	return &openapi.Todo{
+func entityToBody(e *ent.Todo) *model.Todo {
+	return &model.Todo{
 		Id:       strconv.Itoa(e.ID),
 		Title:    e.Title,
 		Category: e.Category,
@@ -25,11 +25,11 @@ func entityToBody(e *ent.Todo) *openapi.Todo {
 func GetList(c *gin.Context) {
 	entities, err := db.Client.Todo.Query().All(context.Background())
 	if err != nil {
-		rest.AbortWithError(c, err)
+		middleware.AbortWithError(c, err)
 		return
 	}
 
-	items := make([]openapi.Todo, 0, len(entities))
+	items := make([]model.Todo, 0, len(entities))
 	for _, entity := range entities {
 		items = append(items, *entityToBody(entity))
 	}
@@ -44,13 +44,13 @@ func GetList(c *gin.Context) {
 }
 
 func Post(c *gin.Context) {
-	var body openapi.Todo
+	var body model.Todo
 	c.BindJSON(&body)
 
 	entity, err := db.Client.Todo.Create().
 		SetTitle(body.Title).SetCategory(body.Category).SetContent(body.Content).Save(context.Background())
 	if err != nil {
-		rest.AbortWithError(c, err)
+		middleware.AbortWithError(c, err)
 		return
 	}
 	body.Id = strconv.Itoa(entity.ID)
@@ -64,10 +64,10 @@ func Get(c *gin.Context) {
 
 	entity, err := db.Client.Todo.Get(context.Background(), id)
 	if _, ok := err.(*ent.NotFoundError); ok {
-		rest.AbortWithRestError(c, rest.NotFoundError)
+		middleware.AbortWithRestError(c, middleware.NotFoundError)
 		return
 	} else if err != nil {
-		rest.AbortWithError(c, err)
+		middleware.AbortWithError(c, err)
 		return
 	}
 
@@ -77,17 +77,17 @@ func Get(c *gin.Context) {
 
 func Put(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
-	var body openapi.Todo
+	var body model.Todo
 	c.BindJSON(&body)
 
 	entity, err := db.Client.Todo.UpdateOneID(id).
 		SetTitle(body.Title).SetCategory(body.Category).SetContent(body.Content).Save(context.Background())
 
 	if _, ok := err.(*ent.NotFoundError); ok {
-		rest.AbortWithRestError(c, rest.NotFoundError)
+		middleware.AbortWithRestError(c, middleware.NotFoundError)
 		return
 	} else if err != nil {
-		rest.AbortWithError(c, err)
+		middleware.AbortWithError(c, err)
 		return
 	}
 
@@ -100,10 +100,10 @@ func Del(c *gin.Context) {
 
 	err := db.Client.Todo.DeleteOneID(id).Exec(context.Background())
 	if _, ok := err.(*ent.NotFoundError); ok {
-		rest.AbortWithRestError(c, rest.NotFoundError)
+		middleware.AbortWithRestError(c, middleware.NotFoundError)
 		return
 	} else if err != nil {
-		rest.AbortWithError(c, err)
+		middleware.AbortWithError(c, err)
 		return
 	}
 
