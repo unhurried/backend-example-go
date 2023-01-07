@@ -4,6 +4,7 @@ import (
 	"context"
 	"example/backend/db"
 	"example/backend/ent"
+	"example/backend/openapi"
 	"example/backend/rest"
 	"net/http"
 	"strconv"
@@ -12,8 +13,8 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-func entityToBody(e *ent.Todo) *Todo {
-	return &Todo{
+func entityToBody(e *ent.Todo) *openapi.Todo {
+	return &openapi.Todo{
 		Id:       strconv.Itoa(e.ID),
 		Title:    e.Title,
 		Category: e.Category,
@@ -28,7 +29,7 @@ func GetList(c *gin.Context) {
 		return
 	}
 
-	items := make([]Todo, 0, len(entities))
+	items := make([]openapi.Todo, 0, len(entities))
 	for _, entity := range entities {
 		items = append(items, *entityToBody(entity))
 	}
@@ -43,7 +44,7 @@ func GetList(c *gin.Context) {
 }
 
 func Post(c *gin.Context) {
-	var body Todo
+	var body openapi.Todo
 	c.BindJSON(&body)
 
 	entity, err := db.Client.Todo.Create().
@@ -76,7 +77,7 @@ func Get(c *gin.Context) {
 
 func Put(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
-	var body Todo
+	var body openapi.Todo
 	c.BindJSON(&body)
 
 	entity, err := db.Client.Todo.UpdateOneID(id).
