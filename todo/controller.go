@@ -12,14 +12,6 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-func Register(g *gin.RouterGroup) {
-	g.GET("", getList)
-	g.POST("", post)
-	g.GET("/:id", get)
-	g.PUT("/:id", put)
-	g.DELETE("/:id", del)
-}
-
 func entityToBody(e *ent.Todo) *Todo {
 	return &Todo{
 		Id:       strconv.Itoa(e.ID),
@@ -29,7 +21,7 @@ func entityToBody(e *ent.Todo) *Todo {
 	}
 }
 
-func getList(c *gin.Context) {
+func GetList(c *gin.Context) {
 	entities, err := db.Client.Todo.Query().All(context.Background())
 	if err != nil {
 		rest.AbortWithError(c, err)
@@ -50,7 +42,7 @@ func getList(c *gin.Context) {
 	c.JSON(http.StatusOK, resBody)
 }
 
-func post(c *gin.Context) {
+func Post(c *gin.Context) {
 	var body Todo
 	c.BindJSON(&body)
 
@@ -66,7 +58,7 @@ func post(c *gin.Context) {
 	c.JSON(http.StatusCreated, body)
 }
 
-func get(c *gin.Context) {
+func Get(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 
 	entity, err := db.Client.Todo.Get(context.Background(), id)
@@ -82,7 +74,7 @@ func get(c *gin.Context) {
 	c.JSON(http.StatusOK, entityToBody(entity))
 }
 
-func put(c *gin.Context) {
+func Put(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 	var body Todo
 	c.BindJSON(&body)
@@ -102,7 +94,7 @@ func put(c *gin.Context) {
 	c.JSON(http.StatusOK, entityToBody(entity))
 }
 
-func del(c *gin.Context) {
+func Del(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 
 	err := db.Client.Todo.DeleteOneID(id).Exec(context.Background())

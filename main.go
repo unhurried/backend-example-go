@@ -3,8 +3,8 @@ package main
 import (
 	"example/backend/db"
 	"example/backend/logger"
+	"example/backend/openapi"
 	"example/backend/rest"
-	"example/backend/todo"
 	"time"
 
 	jwt "github.com/appleboy/gin-jwt/v2"
@@ -30,7 +30,6 @@ func main() {
 	}
 	r.Use(authMiddleware.MiddlewareFunc())
 
-	todos := r.Group("/todos")
-	todo.Register(todos)
+	openapi.AddRoutes(r)
 	r.Run(":3001")
 }

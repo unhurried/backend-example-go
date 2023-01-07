@@ -10,6 +10,7 @@
 package openapi
 
 import (
+	"example/backend/todo"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -18,11 +19,11 @@ import (
 // Route is the information for every URI.
 type Route struct {
 	// Name is the name of this Route.
-	Name        string
+	Name string
 	// Method is the string for the HTTP method. ex) GET, POST etc..
-	Method      string
+	Method string
 	// Pattern is the pattern of the URI.
-	Pattern     string
+	Pattern string
 	// HandlerFunc is the handler function of this route.
 	HandlerFunc gin.HandlerFunc
 }
@@ -31,8 +32,7 @@ type Route struct {
 type Routes []Route
 
 // NewRouter returns a new router.
-func NewRouter() *gin.Engine {
-	router := gin.Default()
+func AddRoutes(router *gin.Engine) {
 	for _, route := range routes {
 		switch route.Method {
 		case http.MethodGet:
@@ -47,8 +47,6 @@ func NewRouter() *gin.Engine {
 			router.DELETE(route.Pattern, route.HandlerFunc)
 		}
 	}
-
-	return router
 }
 
 // Index is the index handler.
@@ -58,44 +56,37 @@ func Index(c *gin.Context) {
 
 var routes = Routes{
 	{
-		"Index",
-		http.MethodGet,
-		"/",
-		Index,
-	},
-
-	{
 		"TodoControllerDelete",
 		http.MethodDelete,
 		"/todos/:id",
-		TodoControllerDelete,
+		todo.Del,
 	},
 
 	{
 		"TodoControllerGet",
 		http.MethodGet,
 		"/todos/:id",
-		TodoControllerGet,
+		todo.Get,
 	},
 
 	{
 		"TodoControllerGetList",
 		http.MethodGet,
 		"/todos",
-		TodoControllerGetList,
+		todo.GetList,
 	},
 
 	{
 		"TodoControllerPost",
 		http.MethodPost,
 		"/todos",
-		TodoControllerPost,
+		todo.Post,
 	},
 
 	{
 		"TodoControllerUpdate",
 		http.MethodPut,
 		"/todos/:id",
-		TodoControllerUpdate,
+		todo.Put,
 	},
 }
