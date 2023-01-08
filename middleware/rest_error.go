@@ -1,6 +1,10 @@
-package rest
+package middleware
 
-import "github.com/gin-gonic/gin"
+import (
+	"example/backend/model"
+
+	"github.com/gin-gonic/gin"
+)
 
 type RestError struct {
 	StatusCode int
@@ -15,7 +19,7 @@ var NotFoundError = RestError{StatusCode: 404, ErrorCode: "not_found"}
 var InternalServerError = RestError{StatusCode: 500, ErrorCode: "internal_server_error"}
 
 func AbortWithRestError(c *gin.Context, e RestError) {
-	c.AbortWithStatusJSON(e.StatusCode, gin.H{"code": e.ErrorCode})
+	c.AbortWithStatusJSON(e.StatusCode, model.Error{Code: e.ErrorCode})
 }
 
 func AbortWithError(c *gin.Context, err error) {

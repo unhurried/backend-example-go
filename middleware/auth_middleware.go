@@ -1,4 +1,4 @@
-package rest
+package middleware
 
 import (
 	"example/backend/env"
