@@ -4,7 +4,7 @@
 // - protoc             v3.21.12
 // source: grpc/todo.proto
 
-package backend
+package grpc
 
 import (
 	context "context"
