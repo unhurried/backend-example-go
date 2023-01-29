@@ -13,6 +13,7 @@ import (
 	ginzap "github.com/gin-contrib/zap"
 	"github.com/gin-gonic/gin"
 
+	grpc_auth "github.com/grpc-ecosystem/go-grpc-middleware/auth"
 	"google.golang.org/grpc"
 )
 
@@ -42,7 +43,7 @@ func runGrpc() {
 		panic(err)
 	}
 
-	s := grpc.NewServer()
+	s := grpc.NewServer(grpc.UnaryInterceptor(grpc_auth.UnaryServerInterceptor(server.Auth)))
 	server.Register(s)
 	logger.Logger.Sugar().Infof("server listening at %v", lis.Addr())
 	if err := s.Serve(lis); err != nil {
