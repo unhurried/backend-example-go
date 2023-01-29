@@ -2,12 +2,16 @@ package server
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
 
 	"example/backend/db"
+	"example/backend/ent"
 	pb "example/backend/grpc"
 )
 
@@ -65,7 +69,9 @@ func (s *server) Create(ctx context.Context, in *pb.TodoCreateRequest) (*pb.Todo
 func (s *server) Get(ctx context.Context, in *pb.TodoGetRequest) (*pb.TodoResponse, error) {
 	id, _ := strconv.Atoi(in.Id)
 	entity, err := db.Client.Todo.Get(context.Background(), id)
-	if err != nil {
+	if ent.IsNotFound(err) {
+		return nil, status.Error(codes.NotFound, "Todo item was not found.")
+	} else if err != nil {
 		return nil, err
 	}
 
@@ -83,7 +89,9 @@ func (s *server) Update(ctx context.Context, in *pb.TodoUpdateeRequest) (*pb.Tod
 		SetCategory(*in.Category).
 		SetContent(*in.Content).
 		Save(context.Background())
-	if err != nil {
+	if ent.IsNotFound(err) {
+		return nil, status.Error(codes.NotFound, "Todo item was not found.")
+	} else if err != nil {
 		return nil, err
 	}
 
@@ -98,7 +106,12 @@ func (s *server) Update(ctx context.Context, in *pb.TodoUpdateeRequest) (*pb.Tod
 func (s *server) Delete(ctx context.Context, in *pb.TodoGetRequest) (*emptypb.Empty, error) {
 	id, _ := strconv.Atoi(in.Id)
 	if err := db.Client.Todo.DeleteOneID(id).Exec(context.Background()); err != nil {
-		return nil, err
+		if ent.IsNotFound(err) {
+			fmt.Println("Not Found")
+			return nil, status.Error(codes.NotFound, "Todo item was not found.")
+		} else {
+			return nil, err
+		}
 	}
 	return &emptypb.Empty{}, nil
 }
