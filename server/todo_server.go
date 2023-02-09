@@ -26,11 +26,11 @@ type server struct {
 func (s *server) GetList(ctx context.Context, in *pb.TodoGetListReuqest) (*pb.TodoGetListResponse, error) {
 	entities, err := db.Client.Todo.Query().Limit(int(*in.Limit)).Offset(int(*in.Offset)).All(context.Background())
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("DB query failed: %w", err)
 	}
 	count, err := db.Client.Todo.Query().Count(context.Background())
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("DB query failed: %w", err)
 	}
 
 	items := []*pb.TodoResponse{}
@@ -55,7 +55,7 @@ func (s *server) Create(ctx context.Context, in *pb.TodoCreateRequest) (*pb.Todo
 		SetContent(*in.Content).
 		Save(context.Background())
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("DB query failed: %w", err)
 	}
 
 	return &pb.TodoResponse{
@@ -72,7 +72,7 @@ func (s *server) Get(ctx context.Context, in *pb.TodoGetRequest) (*pb.TodoRespon
 	if ent.IsNotFound(err) {
 		return nil, status.Error(codes.NotFound, "Todo item was not found.")
 	} else if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("DB query failed: %w", err)
 	}
 
 	return &pb.TodoResponse{
@@ -92,7 +92,7 @@ func (s *server) Update(ctx context.Context, in *pb.TodoUpdateeRequest) (*pb.Tod
 	if ent.IsNotFound(err) {
 		return nil, status.Error(codes.NotFound, "Todo item was not found.")
 	} else if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("DB query failed: %w", err)
 	}
 
 	return &pb.TodoResponse{
@@ -110,7 +110,7 @@ func (s *server) Delete(ctx context.Context, in *pb.TodoGetRequest) (*emptypb.Em
 			fmt.Println("Not Found")
 			return nil, status.Error(codes.NotFound, "Todo item was not found.")
 		} else {
-			return nil, err
+			return nil, fmt.Errorf("DB query failed: %w", err)
 		}
 	}
 	return &emptypb.Empty{}, nil
