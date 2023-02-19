@@ -20,7 +20,7 @@ paths:
           default: 0
           example: 5
           minimum: 0
-          type: number
+          type: integer
         style: form
       - description: Maximum number of items to get
         explode: true
@@ -32,7 +32,7 @@ paths:
           example: 10
           maximum: 100
           minimum: 1
-          type: number
+          type: integer
         style: form
       responses:
         "200":
@@ -218,7 +218,7 @@ components:
           description: Total number of items
           example: 1
           readOnly: true
-          type: number
+          type: integer
       required:
       - items
       - total
