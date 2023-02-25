@@ -39,10 +39,15 @@ func (s Server) TodoControllerPost(ctx echo.Context) error {
 	var body Todo
 	ctx.Bind(&body)
 
+	content := ""
+	if body.Content != nil {
+		content = *body.Content
+	}
+
 	entity, err := db.Client.Todo.Create().
 		SetTitle(body.Title).
 		SetCategory(string(body.Category)).
-		SetContent(*body.Content).Save(context.Background())
+		SetContent(content).Save(context.Background())
 	if err != nil {
 		return err
 	}
@@ -86,10 +91,15 @@ func (s Server) TodoControllerUpdate(ctx echo.Context, id string) error {
 	var body Todo
 	ctx.Bind(&body)
 
-	entity, err := db.Client.Todo.UpdateOneID(idAsInt).
+	query := db.Client.Todo.UpdateOneID(idAsInt).
 		SetTitle(body.Title).
-		SetCategory(string(body.Category)).
-		SetContent(*body.Content).Save(context.Background())
+		SetCategory(string(body.Category))
+
+	if body.Content != nil {
+		query.SetContent(*body.Content)
+	}
+
+	entity, err := query.Save(context.Background())
 	if _, ok := err.(*ent.NotFoundError); ok {
 		return &NotFoundError
 	} else if err != nil {
