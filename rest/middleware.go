@@ -40,3 +40,13 @@ func Jwt() echo.MiddlewareFunc {
 	}
 	return echojwt.WithConfig(config)
 }
+
+func ErrorHandler(err error, c echo.Context) {
+	if re, ok := err.(*RestError); ok {
+		c.JSON(re.StatusCode, &Error{
+			Code: &re.ErrorCode,
+		})
+	}
+
+	c.Echo().DefaultHTTPErrorHandler(err, c)
+}

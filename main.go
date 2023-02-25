@@ -20,6 +20,7 @@ func runRestApi() {
 	e.Use(echomw.Logger())
 	e.Use(echomw.Recover())
 	e.Use(rest.Jwt())
+	e.HTTPErrorHandler = rest.ErrorHandler
 
 	rest.RegisterHandlers(e, s)
 	e.Logger.Fatal(e.Start(":3001"))

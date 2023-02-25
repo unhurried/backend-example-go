@@ -56,7 +56,9 @@ func (s Server) TodoControllerDelete(ctx echo.Context, id string) error {
 	idAsInt, _ := strconv.Atoi(id)
 
 	err := db.Client.Todo.DeleteOneID(idAsInt).Exec(context.Background())
-	if err != nil {
+	if _, ok := err.(*ent.NotFoundError); ok {
+		return &NotFoundError
+	} else if err != nil {
 		return err
 	}
 
@@ -68,7 +70,9 @@ func (s Server) TodoControllerGet(ctx echo.Context, id string) error {
 	idAsInt, _ := strconv.Atoi(id)
 
 	entity, err := db.Client.Todo.Get(context.Background(), idAsInt)
-	if err != nil {
+	if _, ok := err.(*ent.NotFoundError); ok {
+		return &NotFoundError
+	} else if err != nil {
 		return err
 	}
 
@@ -86,7 +90,9 @@ func (s Server) TodoControllerUpdate(ctx echo.Context, id string) error {
 		SetTitle(body.Title).
 		SetCategory(string(body.Category)).
 		SetContent(*body.Content).Save(context.Background())
-	if err != nil {
+	if _, ok := err.(*ent.NotFoundError); ok {
+		return &NotFoundError
+	} else if err != nil {
 		return err
 	}
 
