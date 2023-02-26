@@ -1,7 +1,8 @@
 package logger
 
 import (
-	"github.com/gin-gonic/gin"
+	"example/backend/env"
+
 	"go.uber.org/zap"
 )
 
@@ -10,7 +11,7 @@ var Logger *zap.Logger
 func init() {
 	var err error
 
-	if gin.IsDebugging() {
+	if env.CONFIG.DEBUG_MODE == "true" {
 		Logger, err = zap.NewDevelopment()
 	} else {
 		Logger, err = zap.NewProduction()

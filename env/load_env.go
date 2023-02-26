@@ -8,6 +8,7 @@ import (
 )
 
 type config struct {
+	DEBUG_MODE     string `env:"DEBUG_MODE"`
 	JWT_ALG        string `env:"JWT_ALG"`
 	JWT_KEY        string `env:"JWT_KEY"`
 	JWT_ISS        string `env:"JWT_ISS"`

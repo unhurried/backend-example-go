@@ -3,37 +3,29 @@ package main
 import (
 	"example/backend/db"
 	"example/backend/logger"
-	"example/backend/middleware"
-	"example/backend/router"
+	"example/backend/rest"
 	"example/backend/server"
 	"net"
-	"time"
 
-	jwt "github.com/appleboy/gin-jwt/v2"
-	ginzap "github.com/gin-contrib/zap"
-	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo/v4"
+	echomw "github.com/labstack/echo/v4/middleware"
 
 	grpc_auth "github.com/grpc-ecosystem/go-grpc-middleware/auth"
 	"google.golang.org/grpc"
 )
 
 func runRestApi() {
-	r := gin.New()
+	s := rest.Server{}
+	e := echo.New()
+	e.Use(echomw.Logger())
+	e.Use(echomw.Recover())
+	e.Use(rest.Jwt())
+	e.Use(rest.Validator())
+	e.Pre(echomw.RemoveTrailingSlash())
+	e.HTTPErrorHandler = rest.ErrorHandler
 
-	r.Use(ginzap.Ginzap(logger.Logger, time.RFC3339, true))
-	r.Use(ginzap.RecoveryWithZap(logger.Logger, true))
-
-	r.Use(middleware.ErrorHandler)
-
-	authMiddleware, err := jwt.New(middleware.AuthMiddleware)
-	if err != nil {
-		logger.Logger.Fatal(err.Error())
-		panic(err)
-	}
-	r.Use(authMiddleware.MiddlewareFunc())
-
-	router.AddRoutes(r)
-	r.Run(":3001")
+	rest.RegisterHandlers(e, s)
+	e.Logger.Fatal(e.Start(":3001"))
 }
 
 func runGrpc() {
