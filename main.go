@@ -20,6 +20,7 @@ func runRestApi() {
 	e.Use(echomw.Logger())
 	e.Use(echomw.Recover())
 	e.Use(rest.Jwt())
+	e.Use(rest.Validator())
 	e.Pre(echomw.RemoveTrailingSlash())
 	e.HTTPErrorHandler = rest.ErrorHandler
 

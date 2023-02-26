@@ -5,6 +5,8 @@ import (
 	"example/backend/env"
 	"fmt"
 
+	"github.com/deepmap/oapi-codegen/pkg/middleware"
+	"github.com/getkin/kin-openapi/openapi3filter"
 	gojwt "github.com/golang-jwt/jwt"
 	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
@@ -49,4 +51,13 @@ func ErrorHandler(err error, c echo.Context) {
 	}
 
 	c.Echo().DefaultHTTPErrorHandler(err, c)
+}
+
+func Validator() echo.MiddlewareFunc {
+	swagger, err := GetSwagger()
+	if err != nil {
+		panic(fmt.Errorf("error loading swagger spec\n: %s", err))
+	}
+	return middleware.OapiRequestValidatorWithOptions(swagger,
+		&middleware.Options{Options: openapi3filter.Options{AuthenticationFunc: openapi3filter.NoopAuthenticationFunc}})
 }
